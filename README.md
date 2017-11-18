@@ -3,6 +3,6 @@
 		title="SugarSS logo by Maria Keller"
 		src="http://malyutinegor.github.io/value-sync/1.svg">
 </p>
-<svg
+<img
 	title="SugarSS logo by Maria Keller"
 	src="http://malyutinegor.github.io/value-sync/2.svg">
