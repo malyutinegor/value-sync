@@ -1,4 +1,4 @@
-pair = require './lib/main.js'
+pair = require './src/main.js'
 
 foo = {x: 1}
 bar = {x: 2}
