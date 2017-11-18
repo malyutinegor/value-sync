@@ -32,11 +32,6 @@ class VPortal
 			catch error
 				console.log new Error 'You must set "configurable" in "Object.defineProperty", or you can get bad results!'
 
-		@portals = watchArray @portals, (arg) -> 
-			portal = arg
-			return unless typeof portal == 'object' and portal[0] and portal[1]
-			changed portal
-
 		for portal in @portals  # connect all portals
 			changed portal
 
@@ -50,14 +45,6 @@ class VPortal
 
 	desync: ->
 		@desynchronize.apply @, arguments
-
-
-watchArray = (object, callback) ->
-	return new Proxy object,
-		set: (target, property, value, receiver) ->
-			target[property] = value
-			callback(value)
-			return true
 
 class VSystem
 	getPaths = do ->
