@@ -1,5 +1,9 @@
 <p align="center">
-	<img width="120" height="155"
-		title="SugarSS logo by Maria Keller"
-		src="http://postcss.github.io/sugarss/logo.svg">
+	<svg width="100%" height="500">
+  <foreignObject x="10" y="10" width="100" height="150">
+      <div xmlns="http://www.w3.org/1999/xhtml">
+      <input></input>
+          </div>
+  </foreignObject>
+</svg>
 </p>
