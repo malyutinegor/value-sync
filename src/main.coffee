@@ -1,7 +1,3 @@
-# REMOVE
-_ = require './_.js'
-# END
-
 # - pair(default_value /* (not necessarily) */, [[foo, 'a'], [bar, 'a']])
 class VPortal
 	getter = undefined

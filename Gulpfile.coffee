@@ -7,7 +7,7 @@ rename  = require 'gulp-rename'
 gf      = require 'gulp-if'
 
 gulp.task 'build', ->
-	gulp.src ['src/_.js', 'src/main.coffee']
+	gulp.src ['src/main.coffee']
 
 		.pipe gf('*.coffee', (replace /\#\s*REMOVE\s*\n[\s\S]*?\#\s*END/gi, ''))
 		.pipe gf('*.coffee', (replace /\#\s*REPLACE\s*\n[\s\S]*?\#\s*TO\n([\s\S]*?)\#\s*END/gi, '$1'))
