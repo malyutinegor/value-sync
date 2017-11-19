@@ -13,13 +13,22 @@
 				@portals = arguments[0]
 			sf = @
 
-			changed = (portal, getter, setter) ->
+			for portal in @portals
+				desc = Object.getOwnPropertyDescriptor(portal[0], portal[1])
+				console.log desc.get.toString() if desc and (desc.get or desc.set)
+
+
+			changed = (portal) ->
+				portal[0][portal[1]] = undefined if portal[0][portal[1]] is undefined
 				sf.value = portal[0][portal[1]] if portal[0][portal[1]] isnt undefined and not sf.value  # set default value
+				getter = Object.getOwnPropertyDescriptor(portal[0], portal[1]).get
+
 				try
-					Object.defineProperty portal[0], portal[1],  # define getters
-						get: ->     sf.value
-						set: (s) -> sf.value = s	
+					Object.defineProperty portal[0], portal[1], # define getters
+						get: ()  -> sf.value
+						set: (s) -> sf.value = s
 						configurable: true
+
 				catch error
 					if cf
 						console.log new Error 'You must set "configurable" in "Object.defineProperty", or you can get bad results!'
@@ -29,23 +38,8 @@
 							console.log 'You also can disable this message using "VConfig(\'no cf\')"'
 
 
-			getGetter = (portal) ->
-				portal[0][portal[1]] = undefined if portal[0][portal[1]] is undefined
-				desc = Object.getOwnPropertyDescriptor portal[0], portal[1]
-				desc.get
-
-			getSetter = (portal) ->
-				desc = Object.getOwnPropertyDescriptor portal[0], portal[1]
-				desc.set
-
-			for portal in @portals
-				getter = getter or getGetter portal
-
-			for portal in @portals
-				setter = setter or getSetter portal
-
 			for portal in @portals  # connect all portals
-				changed portal, getter, setter
+				changed portal
 
 		desynchronize: ->
 			for portal in @portals
@@ -92,6 +86,7 @@
 						continue if num is 0
 						prop = prop[step] if prop[step]
 					args.push [prop, pair.name]
+
 				if defs[storageName] isnt undefined
 					portals.push new VPortal defs[storageName], args
 				else if typeof defs isnt 'object'

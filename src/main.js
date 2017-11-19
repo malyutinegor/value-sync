@@ -13,7 +13,7 @@ ref = (function() {
     setter = void 0;
 
     function VPortal() {
-      var changed, getGetter, getSetter, i, j, k, len, len1, len2, portal, ref, ref1, ref2, sf;
+      var changed, desc, i, j, len, len1, portal, ref, ref1, sf;
       if (arguments.length === 2) {
         this.value = arguments[0];
         this.portals = arguments[1];
@@ -21,11 +21,23 @@ ref = (function() {
         this.portals = arguments[0];
       }
       sf = this;
-      changed = function(portal, getter, setter) {
+      ref = this.portals;
+      for (i = 0, len = ref.length; i < len; i++) {
+        portal = ref[i];
+        desc = Object.getOwnPropertyDescriptor(portal[0], portal[1]);
+        if (desc && (desc.get || desc.set)) {
+          console.log(desc.get.toString());
+        }
+      }
+      changed = function(portal) {
         var error;
+        if (portal[0][portal[1]] === void 0) {
+          portal[0][portal[1]] = void 0;
+        }
         if (portal[0][portal[1]] !== void 0 && !sf.value) {
           sf.value = portal[0][portal[1]];
         }
+        getter = Object.getOwnPropertyDescriptor(portal[0], portal[1]).get;
         try {
           return Object.defineProperty(portal[0], portal[1], {
             get: function() {
@@ -48,33 +60,10 @@ ref = (function() {
           }
         }
       };
-      getGetter = function(portal) {
-        var desc;
-        if (portal[0][portal[1]] === void 0) {
-          portal[0][portal[1]] = void 0;
-        }
-        desc = Object.getOwnPropertyDescriptor(portal[0], portal[1]);
-        return desc.get;
-      };
-      getSetter = function(portal) {
-        var desc;
-        desc = Object.getOwnPropertyDescriptor(portal[0], portal[1]);
-        return desc.set;
-      };
-      ref = this.portals;
-      for (i = 0, len = ref.length; i < len; i++) {
-        portal = ref[i];
-        getter = getter || getGetter(portal);
-      }
       ref1 = this.portals;
       for (j = 0, len1 = ref1.length; j < len1; j++) {
         portal = ref1[j];
-        setter = setter || getSetter(portal);
-      }
-      ref2 = this.portals;
-      for (k = 0, len2 = ref2.length; k < len2; k++) {
-        portal = ref2[k];
-        changed(portal, getter, setter);
+        changed(portal);
       }
     }
 

@@ -3,7 +3,7 @@ sync       = require './src/main.js'
 
 
 describe 'value-sync', ->
-	describe '#VSystem', ->
+	describe 'VSystem', ->
 		it 'synchronizes value system with defaults', ->
 			f = (x, y) ->
 				foo = {}
@@ -44,6 +44,7 @@ describe 'value-sync', ->
 			for x in [0..5]
 				for y in [0..5]
 					f x, y
+
 		it 'synchronizes value system without defaults', ->
 			f = (x, y) ->
 				foo = {y: y}
@@ -84,51 +85,33 @@ describe 'value-sync', ->
 				for y in [0..5]
 					f x, y
 
-		it 'synchronizes value system with getter', ->
-			f = (x, y) ->
+	describe 'VPortal', ->
+		it 'synchronizes value without default value', ->
+			f = (x) ->
 				foo = {}
 				bar = {}
 				baz = {}
 
-				rx = x
-				console.log rx
-				Object.defineProperty foo, 'x', 
-					get: -> rx
-					set: (s) -> 
-						rx = s
-						console.log 'SET', s
-					configurable: true
+				desync = new sync.VPortal ([
+					[foo, 'x']
+					[bar, 'x']
+					[baz, 'x'] ])
 
-				system = new sync.VSystem ([
-					[x: 'x', y: 'y']
-					[x: 'x', y: 'y']
-					[x: 'x', y: 'y'] ])
+				defaults = {x: x}
+				returns  = {x: x}
 
-				system.install [foo, bar, baz]
+				foo.x = defaults.x
 
-				baz.y = y
+				assert.equal defaults.x, foo.x
+				assert.equal defaults.x, bar.x
+				assert.equal defaults.x, baz.x
 
-				assert.equal x, foo.x
-				assert.equal y, foo.y
+				baz.x = returns.x
 
-				assert.equal x, bar.x
-				assert.equal y, bar.y
-
-				assert.equal x, baz.x
-				assert.equal y, baz.y
-
-				baz.x = x
-				foo.y = y
-
-				assert.equal x, foo.x
-				assert.equal y, foo.y
-
-				assert.equal x, bar.x
-				assert.equal y, bar.y
-
-				assert.equal x, baz.x
-				assert.equal y, baz.y
+				assert.equal returns.x, foo.x
+				assert.equal returns.x, bar.x
+				assert.equal returns.x, baz.x
 
 			for x in [0..5]
-				f x, 20
-
+				for y in [0..5]
+					f x, y

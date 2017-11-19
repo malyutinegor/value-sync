@@ -6,7 +6,7 @@ sync = require('./src/main.js');
 assert = require('chai').assert;
 
 describe('value-sync', function() {
-  return describe('#VSystem', function() {
+  describe('VSystem', function() {
     it('synchronizes value system with defaults', function() {
       var f, i, results, x, y;
       f = function(x, y) {
@@ -69,7 +69,7 @@ describe('value-sync', function() {
       }
       return results;
     });
-    it('synchronizes value system without defaults', function() {
+    return it('synchronizes value system without defaults', function() {
       var f, i, results, x, y;
       f = function(x, y) {
         var bar, baz, foo, returns, system;
@@ -131,63 +131,41 @@ describe('value-sync', function() {
       }
       return results;
     });
-    return it('synchronizes value system with getter', function() {
-      var f, i, results, x;
-      f = function(x, y) {
-        var bar, baz, foo, rx, system;
+  });
+  return describe('VPortal', function() {
+    return it('synchronizes value without default value', function() {
+      var f, i, results, x, y;
+      f = function(x) {
+        var bar, baz, defaults, desync, foo, returns;
         foo = {};
         bar = {};
         baz = {};
-        rx = x;
-        console.log(rx);
-        Object.defineProperty(foo, 'x', {
-          get: function() {
-            return rx;
-          },
-          set: function(s) {
-            rx = s;
-            return console.log('SET', s);
-          },
-          configurable: true
-        });
-        system = new sync.VSystem([
-          [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ], [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ], [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ]
-        ]);
-        system.install([foo, bar, baz]);
-        baz.y = y;
-        assert.equal(x, foo.x);
-        assert.equal(y, foo.y);
-        assert.equal(x, bar.x);
-        assert.equal(y, bar.y);
-        assert.equal(x, baz.x);
-        assert.equal(y, baz.y);
-        baz.x = x;
-        foo.y = y;
-        assert.equal(x, foo.x);
-        assert.equal(y, foo.y);
-        assert.equal(x, bar.x);
-        assert.equal(y, bar.y);
-        assert.equal(x, baz.x);
-        return assert.equal(y, baz.y);
+        desync = new sync.VPortal([[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+        defaults = {
+          x: x
+        };
+        returns = {
+          x: x
+        };
+        foo.x = defaults.x;
+        assert.equal(defaults.x, foo.x);
+        assert.equal(defaults.x, bar.x);
+        assert.equal(defaults.x, baz.x);
+        baz.x = returns.x;
+        assert.equal(returns.x, foo.x);
+        assert.equal(returns.x, bar.x);
+        return assert.equal(returns.x, baz.x);
       };
       results = [];
       for (x = i = 0; i <= 5; x = ++i) {
-        results.push(f(x, 20));
+        results.push((function() {
+          var j, results1;
+          results1 = [];
+          for (y = j = 0; j <= 5; y = ++j) {
+            results1.push(f(x, y));
+          }
+          return results1;
+        })());
       }
       return results;
     });
