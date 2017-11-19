@@ -37,7 +37,6 @@ ref = (function() {
         if (portal[0][portal[1]] !== void 0 && !sf.value) {
           sf.value = portal[0][portal[1]];
         }
-        getter = Object.getOwnPropertyDescriptor(portal[0], portal[1]).get;
         try {
           return Object.defineProperty(portal[0], portal[1], {
             get: function() {
@@ -74,9 +73,9 @@ ref = (function() {
       for (i = 0, len = ref.length; i < len; i++) {
         portal = ref[i];
         results.push(Object.defineProperty(portal[0], portal[1], {
-          enumerable: false,
-          writable: false,
-          configurable: false,
+          enumerable: true,
+          writable: true,
+          configurable: true,
           value: this.value
         }));
       }

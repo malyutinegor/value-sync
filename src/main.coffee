@@ -21,8 +21,6 @@
 			changed = (portal) ->
 				portal[0][portal[1]] = undefined if portal[0][portal[1]] is undefined
 				sf.value = portal[0][portal[1]] if portal[0][portal[1]] isnt undefined and not sf.value  # set default value
-				getter = Object.getOwnPropertyDescriptor(portal[0], portal[1]).get
-
 				try
 					Object.defineProperty portal[0], portal[1], # define getters
 						get: ()  -> sf.value
@@ -44,9 +42,9 @@
 		desynchronize: ->
 			for portal in @portals
 				Object.defineProperty portal[0], portal[1],
-					enumerable: false,
-					writable: false,
-					configurable: false,
+					enumerable: true,
+					writable: true,
+					configurable: true,
 					value: @value
 
 		desync: ->
