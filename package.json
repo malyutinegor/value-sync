@@ -2,10 +2,10 @@
   "name": "value-sync",
   "version": "1.0.0",
   "description": "",
-  "main": "test.js",
+  "main": "src/main.js",
   "scripts": {},
-  "author": "",
-  "license": "ISC",
+  "author": "egorgl",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^4.1.2",
     "gulp": "^3.9.1",
