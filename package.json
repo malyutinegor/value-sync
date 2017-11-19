@@ -1,7 +1,7 @@
 {
   "name": "value-sync",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Synchronise values of objects!",
   "main": "src/main.js",
   "scripts": {},
   "author": "egorgl",
