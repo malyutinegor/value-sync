@@ -3,115 +3,305 @@ sync       = require './src/main.js'
 
 
 describe 'value-sync', ->
-	describe 'VSystem', ->
-		it 'synchronizes value system with defaults', ->
+	describe 'VPortal', ->
+		it 'synchronizes properties without default value', ->
 			f = (x, y) ->
+				defaults = {x: x, y: y}
+				returns  = {x: x + 5, y: y + 5}
+
 				foo = {}
 				bar = {}
 				baz = {}
 
-				system = new sync.VSystem ([
-					[x: 'x', y: 'y']
-					[x: 'x', y: 'y']
-					[x: 'x', y: 'y'] ])
 
-				defaults = {x: x, y: y}
-				returns  = {x: x, y: y}
+				portal = new sync.VPortal ([
+					[foo, 'x']
+					[bar, 'x']
+					[baz, 'x'] ])
 
-				system.install defaults, [foo, bar, baz]
+				portal2 = new sync.VPortal ([
+					[foo, 'y']
+					[bar, 'y']
+					[baz, 'y'] ])
+
+
+				foo.x = defaults.x
+				bar.y = defaults.y
 
 				assert.equal defaults.x, foo.x
-				assert.equal defaults.y, foo.y
-
 				assert.equal defaults.x, bar.x
-				assert.equal defaults.y, bar.y
-
 				assert.equal defaults.x, baz.x
+				assert.equal defaults.y, foo.y
+				assert.equal defaults.y, bar.y
 				assert.equal defaults.y, baz.y
 
 				baz.x = returns.x
 				foo.y = returns.y
 
 				assert.equal returns.x, foo.x
-				assert.equal returns.y, foo.y
-
 				assert.equal returns.x, bar.x
-				assert.equal returns.y, bar.y
-
 				assert.equal returns.x, baz.x
+				assert.equal returns.y, foo.y
+				assert.equal returns.y, bar.y
 				assert.equal returns.y, baz.y
 
 			for x in [0..5]
 				for y in [0..5]
 					f x, y
 
-		it 'synchronizes value system without defaults', ->
+		it 'synchronizes properties with default value', ->
 			f = (x, y) ->
-				foo = {y: y}
+				defaults = {x: x, y: y}
+				returns  = {x: x + 5, y: y + 5}				
+
+				foo = {}
 				bar = {}
-				baz = {x: x}
+				baz = {}
 
-				system = new sync.VSystem ([
-					[x: 'x', y: 'y']
-					[x: 'x', y: 'y']
-					[x: 'x', y: 'y'] ])
+				portal  = new sync.VPortal defaults.x, ([
+					[foo, 'x']
+					[bar, 'x']
+					[baz, 'x'] ])
 
-				returns = {x: x, y: y}
+				portal2 = new sync.VPortal defaults.y, ([
+					[foo, 'y']
+					[bar, 'y']
+					[baz, 'y'] ])
 
-				system.install [foo, bar, baz]
 
-				assert.equal x, foo.x
-				assert.equal y, foo.y
-
-				assert.equal x, bar.x
-				assert.equal y, bar.y
-
-				assert.equal x, baz.x
-				assert.equal y, baz.y
+				assert.equal defaults.x, foo.x
+				assert.equal defaults.x, bar.x
+				assert.equal defaults.x, baz.x
+				assert.equal defaults.y, foo.y
+				assert.equal defaults.y, bar.y
+				assert.equal defaults.y, baz.y
 
 				baz.x = returns.x
 				foo.y = returns.y
 
 				assert.equal returns.x, foo.x
-				assert.equal returns.y, foo.y
-
 				assert.equal returns.x, bar.x
-				assert.equal returns.y, bar.y
-
 				assert.equal returns.x, baz.x
+				assert.equal returns.y, foo.y
+				assert.equal returns.y, bar.y
 				assert.equal returns.y, baz.y
 
 			for x in [0..5]
 				for y in [0..5]
 					f x, y
 
-	describe 'VPortal', ->
-		it 'synchronizes value without default value', ->
-			f = (x) ->
+		it 'synchronizes properties with descriptor', ->
+			f = (x, y) ->
+				defaults = {x, y}
+				returns  = {x, y}				
+
 				foo = {}
 				bar = {}
 				baz = {}
 
-				desync = new sync.VPortal ([
+				rx = defaults.x
+				ry = defaults.y
+				Object.defineProperty foo, 'x',
+					get: ( ) -> rx - 5
+					set: (s) -> rx = s
+					configurable: true
+				Object.defineProperty foo, 'y',
+					get: ( ) -> ry + 5
+					set: (s) -> ry = s
+					configurable: true
+
+				portal  = new sync.VPortal ([
 					[foo, 'x']
 					[bar, 'x']
 					[baz, 'x'] ])
+				portal2 = new sync.VPortal ([
+					[foo, 'y']
+					[bar, 'y']
+					[baz, 'y'] ])
 
-				defaults = {x: x}
-				returns  = {x: x}
 
-				foo.x = defaults.x
+				assert.equal defaults.x, foo.x + 5
+				assert.equal defaults.x, bar.x + 5
+				assert.equal defaults.x, baz.x + 5
+				assert.equal defaults.y, foo.y - 5
+				assert.equal defaults.y, bar.y - 5
+				assert.equal defaults.y, baz.y - 5
 
-				assert.equal defaults.x, foo.x
-				assert.equal defaults.x, bar.x
-				assert.equal defaults.x, baz.x
+				bar.x = returns.x
+				baz.y = returns.y
 
-				baz.x = returns.x
-
-				assert.equal returns.x, foo.x
-				assert.equal returns.x, bar.x
-				assert.equal returns.x, baz.x
+				assert.equal returns.x, foo.x + 5
+				assert.equal returns.x, bar.x + 5
+				assert.equal returns.x, baz.x + 5
+				assert.equal returns.y, foo.y - 5
+				assert.equal returns.y, bar.y - 5
+				assert.equal returns.y, baz.y - 5
 
 			for x in [0..5]
 				for y in [0..5]
 					f x, y
+
+		describe 'desynchronize', ->
+			it 'desynchronizes portal', ->
+				f = (x, y) ->
+					defaults = {x: x, y: y}
+					returns  = {x: (Math.random() * 100), y: (Math.random() * 100)}
+
+					foo = {}
+					bar = {}
+					baz = {}
+
+
+					portal = new sync.VPortal ([
+						[foo, 'x']
+						[bar, 'x']
+						[baz, 'x'] ])
+					portal2 = new sync.VPortal ([
+						[foo, 'y']
+						[bar, 'y']
+						[baz, 'y'] ])
+
+
+					foo.x = defaults.x
+					bar.y = defaults.y
+
+					assert.equal defaults.x, foo.x
+					assert.equal defaults.x, bar.x
+					assert.equal defaults.x, baz.x
+					assert.equal defaults.y, foo.y
+					assert.equal defaults.y, bar.y
+					assert.equal defaults.y, baz.y
+
+					portal.desync()
+					portal2.desync()
+
+					foo.x = returns.x
+					foo.y = returns.y
+
+					assert.equal returns.x, foo.x
+					assert.equal returns.y, foo.y
+
+					assert.equal defaults.x, bar.x
+					assert.equal defaults.x, baz.x
+					assert.equal defaults.y, bar.y
+					assert.equal defaults.y, baz.y
+
+				for x in [0..5]
+					for y in [0..5]
+						f x, y
+
+
+
+	describe 'VDescriptor', ->
+		it 'synchronizes properties with default descriptor', ->
+			f = (x, y) ->
+				defaults = {x, y}
+				returns  = {x, y}				
+
+				foo = {}
+				bar = {}
+				baz = {}
+
+				rx = defaults.x
+				ry = defaults.y
+				desc =
+					get: ( ) -> rx - 5
+					set: (s) -> rx = s
+					configurable: true
+				desc2 =
+					get: ( ) -> ry + 5
+					set: (s) -> ry = s
+					configurable: true
+
+				portal  = new sync.VD desc,  ([
+					[foo, 'x']
+					[bar, 'x']
+					[baz, 'x'] ])
+
+				portal2 = new sync.VD desc2, ([
+					[foo, 'y']
+					[bar, 'y']
+					[baz, 'y'] ])
+
+
+				assert.equal defaults.x, foo.x + 5
+				assert.equal defaults.x, bar.x + 5
+				assert.equal defaults.x, baz.x + 5
+				assert.equal defaults.y, foo.y - 5
+				assert.equal defaults.y, bar.y - 5
+				assert.equal defaults.y, baz.y - 5
+
+				baz.x = returns.x
+				foo.y = returns.y
+
+				assert.equal returns.x, foo.x + 5
+				assert.equal returns.x, bar.x + 5
+				assert.equal returns.x, baz.x + 5
+				assert.equal returns.y, foo.y - 5
+				assert.equal returns.y, bar.y - 5
+				assert.equal returns.y, baz.y - 5
+
+			for x in [0..5]
+				for y in [0..5]
+					f x, y
+				describe 'desynchronize', ->
+
+		describe 'desynchronize', ->
+			it 'desynchronizes portal', ->
+				f = (x, y) ->
+					defaults = {x: x, y: y}
+					returns  = {x: (Math.random() * 100), y: (Math.random() * 100)}
+
+					foo = {}
+					bar = {}
+					baz = {}
+
+					rx = defaults.x
+					ry = defaults.y
+					desc =
+						get: ( ) -> rx - 5
+						set: (s) -> rx = s
+						configurable: true
+					desc2 =
+						get: ( ) -> ry + 5
+						set: (s) -> ry = s
+						configurable: true
+
+
+					portal = new sync.VD desc, ([
+						[foo, 'x']
+						[bar, 'x']
+						[baz, 'x'] ])
+					portal2 = new sync.VD desc2, ([
+						[foo, 'y']
+						[bar, 'y']
+						[baz, 'y'] ])
+
+
+					foo.x = defaults.x
+					bar.y = defaults.y
+
+					# assert.equal defaults.x, foo.x
+					# assert.equal defaults.x, bar.x
+					# assert.equal defaults.x, baz.x
+					# assert.equal defaults.y, foo.y
+					# assert.equal defaults.y, bar.y
+					# assert.equal defaults.y, baz.y
+
+					portal.desync()
+					portal2.desync()
+
+					foo.x = returns.x
+					foo.y = returns.y
+
+					assert.equal returns.x, foo.x
+					assert.equal returns.y, foo.y
+
+					assert.equal defaults.x, bar.x + 5
+					assert.equal defaults.x, baz.x + 5
+					assert.equal defaults.y, bar.y - 5
+					assert.equal defaults.y, baz.y - 5
+
+				for x in [0..5]
+					for y in [0..5]
+						f x, y

@@ -6,54 +6,39 @@ sync = require('./src/main.js');
 assert = require('chai').assert;
 
 describe('value-sync', function() {
-  describe('VSystem', function() {
-    it('synchronizes value system with defaults', function() {
+  describe('VPortal', function() {
+    it('synchronizes properties without default value', function() {
       var f, i, results, x, y;
       f = function(x, y) {
-        var bar, baz, defaults, foo, returns, system;
-        foo = {};
-        bar = {};
-        baz = {};
-        system = new sync.VSystem([
-          [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ], [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ], [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ]
-        ]);
+        var bar, baz, defaults, foo, portal, portal2, returns;
         defaults = {
           x: x,
           y: y
         };
         returns = {
-          x: x,
-          y: y
+          x: x + 5,
+          y: y + 5
         };
-        system.install(defaults, [foo, bar, baz]);
+        foo = {};
+        bar = {};
+        baz = {};
+        portal = new sync.VPortal([[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+        portal2 = new sync.VPortal([[foo, 'y'], [bar, 'y'], [baz, 'y']]);
+        foo.x = defaults.x;
+        bar.y = defaults.y;
         assert.equal(defaults.x, foo.x);
-        assert.equal(defaults.y, foo.y);
         assert.equal(defaults.x, bar.x);
-        assert.equal(defaults.y, bar.y);
         assert.equal(defaults.x, baz.x);
+        assert.equal(defaults.y, foo.y);
+        assert.equal(defaults.y, bar.y);
         assert.equal(defaults.y, baz.y);
         baz.x = returns.x;
         foo.y = returns.y;
         assert.equal(returns.x, foo.x);
-        assert.equal(returns.y, foo.y);
         assert.equal(returns.x, bar.x);
-        assert.equal(returns.y, bar.y);
         assert.equal(returns.x, baz.x);
+        assert.equal(returns.y, foo.y);
+        assert.equal(returns.y, bar.y);
         return assert.equal(returns.y, baz.y);
       };
       results = [];
@@ -69,54 +54,102 @@ describe('value-sync', function() {
       }
       return results;
     });
-    return it('synchronizes value system without defaults', function() {
+    it('synchronizes properties with default value', function() {
       var f, i, results, x, y;
       f = function(x, y) {
-        var bar, baz, foo, returns, system;
-        foo = {
+        var bar, baz, defaults, foo, portal, portal2, returns;
+        defaults = {
+          x: x,
           y: y
         };
-        bar = {};
-        baz = {
-          x: x
+        returns = {
+          x: x + 5,
+          y: y + 5
         };
-        system = new sync.VSystem([
-          [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ], [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ], [
-            {
-              x: 'x',
-              y: 'y'
-            }
-          ]
-        ]);
+        foo = {};
+        bar = {};
+        baz = {};
+        portal = new sync.VPortal(defaults.x, [[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+        portal2 = new sync.VPortal(defaults.y, [[foo, 'y'], [bar, 'y'], [baz, 'y']]);
+        assert.equal(defaults.x, foo.x);
+        assert.equal(defaults.x, bar.x);
+        assert.equal(defaults.x, baz.x);
+        assert.equal(defaults.y, foo.y);
+        assert.equal(defaults.y, bar.y);
+        assert.equal(defaults.y, baz.y);
+        baz.x = returns.x;
+        foo.y = returns.y;
+        assert.equal(returns.x, foo.x);
+        assert.equal(returns.x, bar.x);
+        assert.equal(returns.x, baz.x);
+        assert.equal(returns.y, foo.y);
+        assert.equal(returns.y, bar.y);
+        return assert.equal(returns.y, baz.y);
+      };
+      results = [];
+      for (x = i = 0; i <= 5; x = ++i) {
+        results.push((function() {
+          var j, results1;
+          results1 = [];
+          for (y = j = 0; j <= 5; y = ++j) {
+            results1.push(f(x, y));
+          }
+          return results1;
+        })());
+      }
+      return results;
+    });
+    it('synchronizes properties with descriptor', function() {
+      var f, i, results, x, y;
+      f = function(x, y) {
+        var bar, baz, defaults, foo, portal, portal2, returns, rx, ry;
+        defaults = {
+          x: x,
+          y: y
+        };
         returns = {
           x: x,
           y: y
         };
-        system.install([foo, bar, baz]);
-        assert.equal(x, foo.x);
-        assert.equal(y, foo.y);
-        assert.equal(x, bar.x);
-        assert.equal(y, bar.y);
-        assert.equal(x, baz.x);
-        assert.equal(y, baz.y);
-        baz.x = returns.x;
-        foo.y = returns.y;
-        assert.equal(returns.x, foo.x);
-        assert.equal(returns.y, foo.y);
-        assert.equal(returns.x, bar.x);
-        assert.equal(returns.y, bar.y);
-        assert.equal(returns.x, baz.x);
-        return assert.equal(returns.y, baz.y);
+        foo = {};
+        bar = {};
+        baz = {};
+        rx = defaults.x;
+        ry = defaults.y;
+        Object.defineProperty(foo, 'x', {
+          get: function() {
+            return rx - 5;
+          },
+          set: function(s) {
+            return rx = s;
+          },
+          configurable: true
+        });
+        Object.defineProperty(foo, 'y', {
+          get: function() {
+            return ry + 5;
+          },
+          set: function(s) {
+            return ry = s;
+          },
+          configurable: true
+        });
+        portal = new sync.VPortal([[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+        portal2 = new sync.VPortal([[foo, 'y'], [bar, 'y'], [baz, 'y']]);
+        assert.equal(defaults.x, foo.x + 5);
+        assert.equal(defaults.x, bar.x + 5);
+        assert.equal(defaults.x, baz.x + 5);
+        assert.equal(defaults.y, foo.y - 5);
+        assert.equal(defaults.y, bar.y - 5);
+        assert.equal(defaults.y, baz.y - 5);
+        bar.x = returns.x;
+        baz.y = returns.y;
+        assert.equal(returns.x, foo.x + 5);
+        assert.equal(returns.x, bar.x + 5);
+        assert.equal(returns.x, baz.x + 5);
+        assert.equal(returns.y, foo.y - 5);
+        assert.equal(returns.y, bar.y - 5);
+        return assert.equal(returns.y, baz.y - 5);
       };
       results = [];
       for (x = i = 0; i <= 5; x = ++i) {
@@ -131,43 +164,184 @@ describe('value-sync', function() {
       }
       return results;
     });
+    return describe('desynchronize', function() {
+      return it('desynchronizes portal', function() {
+        var f, i, results, x, y;
+        f = function(x, y) {
+          var bar, baz, defaults, foo, portal, portal2, returns;
+          defaults = {
+            x: x,
+            y: y
+          };
+          returns = {
+            x: Math.random() * 100,
+            y: Math.random() * 100
+          };
+          foo = {};
+          bar = {};
+          baz = {};
+          portal = new sync.VPortal([[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+          portal2 = new sync.VPortal([[foo, 'y'], [bar, 'y'], [baz, 'y']]);
+          foo.x = defaults.x;
+          bar.y = defaults.y;
+          assert.equal(defaults.x, foo.x);
+          assert.equal(defaults.x, bar.x);
+          assert.equal(defaults.x, baz.x);
+          assert.equal(defaults.y, foo.y);
+          assert.equal(defaults.y, bar.y);
+          assert.equal(defaults.y, baz.y);
+          portal.desync();
+          portal2.desync();
+          foo.x = returns.x;
+          foo.y = returns.y;
+          assert.equal(returns.x, foo.x);
+          assert.equal(returns.y, foo.y);
+          assert.equal(defaults.x, bar.x);
+          assert.equal(defaults.x, baz.x);
+          assert.equal(defaults.y, bar.y);
+          return assert.equal(defaults.y, baz.y);
+        };
+        results = [];
+        for (x = i = 0; i <= 5; x = ++i) {
+          results.push((function() {
+            var j, results1;
+            results1 = [];
+            for (y = j = 0; j <= 5; y = ++j) {
+              results1.push(f(x, y));
+            }
+            return results1;
+          })());
+        }
+        return results;
+      });
+    });
   });
-  return describe('VPortal', function() {
-    return it('synchronizes value without default value', function() {
-      var f, i, results, x, y;
-      f = function(x) {
-        var bar, baz, defaults, desync, foo, returns;
+  return describe('VDescriptor', function() {
+    it('synchronizes properties with default descriptor', function() {
+      var f, i, j, results, x, y;
+      f = function(x, y) {
+        var bar, baz, defaults, desc, desc2, foo, portal, portal2, returns, rx, ry;
+        defaults = {
+          x: x,
+          y: y
+        };
+        returns = {
+          x: x,
+          y: y
+        };
         foo = {};
         bar = {};
         baz = {};
-        desync = new sync.VPortal([[foo, 'x'], [bar, 'x'], [baz, 'x']]);
-        defaults = {
-          x: x
+        rx = defaults.x;
+        ry = defaults.y;
+        desc = {
+          get: function() {
+            return rx - 5;
+          },
+          set: function(s) {
+            return rx = s;
+          },
+          configurable: true
         };
-        returns = {
-          x: x
+        desc2 = {
+          get: function() {
+            return ry + 5;
+          },
+          set: function(s) {
+            return ry = s;
+          },
+          configurable: true
         };
-        foo.x = defaults.x;
-        assert.equal(defaults.x, foo.x);
-        assert.equal(defaults.x, bar.x);
-        assert.equal(defaults.x, baz.x);
+        portal = new sync.VD(desc, [[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+        portal2 = new sync.VD(desc2, [[foo, 'y'], [bar, 'y'], [baz, 'y']]);
+        assert.equal(defaults.x, foo.x + 5);
+        assert.equal(defaults.x, bar.x + 5);
+        assert.equal(defaults.x, baz.x + 5);
+        assert.equal(defaults.y, foo.y - 5);
+        assert.equal(defaults.y, bar.y - 5);
+        assert.equal(defaults.y, baz.y - 5);
         baz.x = returns.x;
-        assert.equal(returns.x, foo.x);
-        assert.equal(returns.x, bar.x);
-        return assert.equal(returns.x, baz.x);
+        foo.y = returns.y;
+        assert.equal(returns.x, foo.x + 5);
+        assert.equal(returns.x, bar.x + 5);
+        assert.equal(returns.x, baz.x + 5);
+        assert.equal(returns.y, foo.y - 5);
+        assert.equal(returns.y, bar.y - 5);
+        return assert.equal(returns.y, baz.y - 5);
       };
       results = [];
       for (x = i = 0; i <= 5; x = ++i) {
-        results.push((function() {
-          var j, results1;
-          results1 = [];
-          for (y = j = 0; j <= 5; y = ++j) {
-            results1.push(f(x, y));
-          }
-          return results1;
-        })());
+        for (y = j = 0; j <= 5; y = ++j) {
+          f(x, y);
+        }
+        results.push(describe('desynchronize', function() {}));
       }
       return results;
+    });
+    return describe('desynchronize', function() {
+      return it('desynchronizes portal', function() {
+        var f, i, results, x, y;
+        f = function(x, y) {
+          var bar, baz, defaults, desc, desc2, foo, portal, portal2, returns, rx, ry;
+          defaults = {
+            x: x,
+            y: y
+          };
+          returns = {
+            x: Math.random() * 100,
+            y: Math.random() * 100
+          };
+          foo = {};
+          bar = {};
+          baz = {};
+          rx = defaults.x;
+          ry = defaults.y;
+          desc = {
+            get: function() {
+              return rx - 5;
+            },
+            set: function(s) {
+              return rx = s;
+            },
+            configurable: true
+          };
+          desc2 = {
+            get: function() {
+              return ry + 5;
+            },
+            set: function(s) {
+              return ry = s;
+            },
+            configurable: true
+          };
+          portal = new sync.VD(desc, [[foo, 'x'], [bar, 'x'], [baz, 'x']]);
+          portal2 = new sync.VD(desc2, [[foo, 'y'], [bar, 'y'], [baz, 'y']]);
+          foo.x = defaults.x;
+          bar.y = defaults.y;
+          portal.desync();
+          portal2.desync();
+          foo.x = returns.x;
+          foo.y = returns.y;
+          assert.equal(returns.x, foo.x);
+          assert.equal(returns.y, foo.y);
+          assert.equal(defaults.x, bar.x + 5);
+          assert.equal(defaults.x, baz.x + 5);
+          assert.equal(defaults.y, bar.y - 5);
+          return assert.equal(defaults.y, baz.y - 5);
+        };
+        results = [];
+        for (x = i = 0; i <= 5; x = ++i) {
+          results.push((function() {
+            var j, results1;
+            results1 = [];
+            for (y = j = 0; j <= 5; y = ++j) {
+              results1.push(f(x, y));
+            }
+            return results1;
+          })());
+        }
+        return results;
+      });
     });
   });
 });
